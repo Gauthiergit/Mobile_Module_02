@@ -2,6 +2,7 @@ import { StyleSheet } from "react-native";
 
 export const tintColor = '#e03d0b';
 export const secondaryTextColor = 'grey';
+export const errorTextColor = 'red';
 
 export const Colors = {
   light: {

@@ -1,14 +1,19 @@
 import { ThemedText } from '@/components/ThemedText';
-import { Styles } from '@/constants/theme';
-import { useSearchLocalisation } from '@/providers/SearchLocalisationProvider';
+import { errorTextColor, Styles } from '@/constants/theme';
+import { useSearchlocation } from '@/providers/SearchLocationProvider';
 import { View } from 'react-native';
 
 export default function CurrentlyScreen() {
-	const { localisation } = useSearchLocalisation();
+	const { location, errorMessage} = useSearchlocation();
 	return (
 		<View style={Styles.container}>
 			<ThemedText type="title">Currently</ThemedText>
-			<ThemedText type="title">{localisation}</ThemedText>
+			{location && (
+				<ThemedText type="default">{location}</ThemedText>
+			)}
+			{errorMessage && (
+				<ThemedText type="default" color={errorTextColor}>{errorMessage}</ThemedText>
+			)}
 		</View>
 	);
 }

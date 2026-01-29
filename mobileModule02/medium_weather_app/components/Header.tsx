@@ -1,14 +1,35 @@
 import { Colors, secondaryTextColor, tintColor } from "@/constants/theme";
-import { useSearchLocalisation } from "@/providers/SearchLocalisationProvider";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Pressable, StyleSheet, TextInput, useColorScheme, View } from "react-native";
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { useSearchlocation } from "@/providers/SearchLocationProvider";
+import * as Location from 'expo-location';
 
 export function Header() {
-	const { setLocalisation } = useSearchLocalisation();
-	const [curLocalisation, setCurLocalisation] = useState("");
+	const { setLocation, setErrorMessage } = useSearchlocation();
+	const [ locationSearched, setLocationSearched ] = useState<string | undefined>();
 	const colorScheme = useColorScheme();
+
+	async function getCurrentLocation() {
+		setErrorMessage(null);
+		setLocation(undefined);
+		let { status } = await Location.requestForegroundPermissionsAsync();
+		if (status !== 'granted') {
+			setErrorMessage("Geolocalisation is not available");
+			return;
+		}
+
+		let location = await Location.getCurrentPositionAsync({});
+		let latitude = location.coords.latitude.toString();
+		let longitude = location.coords.longitude.toString();
+		setLocation(`${latitude} ${longitude}`)
+	}
+
+
+	useEffect(() => {
+		getCurrentLocation();
+	}, [setLocation]);
 
 	return (
 		<View style={styles.header}>
@@ -17,13 +38,13 @@ export function Header() {
 				placeholder="Entez une localisation..."
 				style={[styles.input, { color: Colors[colorScheme ?? "light"].text }]}
 				placeholderTextColor={secondaryTextColor}
-				value={curLocalisation}
-				onChangeText={setCurLocalisation}
-				onSubmitEditing={() => setLocalisation(curLocalisation)}
+				value={locationSearched}
+				onChangeText={setLocationSearched}
+				onSubmitEditing={() => setLocation(locationSearched)}
 				returnKeyType="search"
 			/>
 			<Pressable
-				onPress={() => setLocalisation("Geolocation")}
+				onPress={getCurrentLocation}
 				style={({ pressed }) => [
 					{ opacity: pressed ? 0.5 : 1 },
 					styles.button
@@ -56,5 +77,5 @@ const styles = StyleSheet.create({
 		borderRadius: 50,
 		borderColor: tintColor,
 		borderWidth: 1
-  	},
+	},
 });

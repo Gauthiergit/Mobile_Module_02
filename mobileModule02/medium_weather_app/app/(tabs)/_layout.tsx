@@ -4,10 +4,10 @@ import { useColorScheme } from 'react-native';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { withLayoutContext } from 'expo-router';
-import { SearchLocalisationProvider } from '@/providers/SearchLocalisationProvider';
 import { Header } from '@/components/Header';
 import { PlatformWrapper } from '@/wrappers/PlatformWrapper';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
+import { SearchlocationProvider } from '@/providers/SearchLocationProvider';
 
 export default function TabLayout() {
 
@@ -16,21 +16,21 @@ export default function TabLayout() {
 	const MaterialTopTabs = withLayoutContext(Navigator);
 
 	return (
-		<SearchLocalisationProvider>
+		<SearchlocationProvider>
 			<PlatformWrapper>
-				<Header/>
+				<Header />
 				<MaterialTopTabs
 					tabBarPosition="bottom"
 					screenOptions={{
-					tabBarActiveTintColor: tintColor,
-					tabBarInactiveTintColor: 'gray',
-					tabBarLabelStyle: { fontSize: 20, textTransform: 'none' },
-					tabBarIndicatorStyle: { backgroundColor: tintColor, height: 2, top: 0 },
-					tabBarStyle: { backgroundColor: Colors[colorScheme ?? "light"].background },
-					swipeEnabled: true,
-				}}>
+						tabBarActiveTintColor: tintColor,
+						tabBarInactiveTintColor: 'gray',
+						tabBarLabelStyle: { fontSize: 20, textTransform: 'none' },
+						tabBarIndicatorStyle: { backgroundColor: tintColor, height: 2, top: 0 },
+						tabBarStyle: { backgroundColor: Colors[colorScheme ?? "light"].background },
+						swipeEnabled: true,
+					}}>
 					<MaterialTopTabs.Screen
-						name="index" 
+						name="index"
 						options={{
 							title: 'Currently',
 							tabBarIcon: ({ color }: { color: string }) => <MaterialCommunityIcons name="weather-sunset" size={30} color={color} />,
@@ -47,11 +47,11 @@ export default function TabLayout() {
 						name="weekly"
 						options={{
 							title: 'Weekly',
-							tabBarIcon: ({ color }: { color: string }) => <FontAwesome5 name="calendar-week" size={30} color={color}/>,
+							tabBarIcon: ({ color }: { color: string }) => <FontAwesome5 name="calendar-week" size={30} color={color} />,
 						}}
 					/>
 				</MaterialTopTabs>
 			</PlatformWrapper>
-		</SearchLocalisationProvider>
+		</SearchlocationProvider>
 	);
 }
