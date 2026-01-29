@@ -5,11 +5,16 @@ import FontAwesome from '@expo/vector-icons/FontAwesome';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useSearchlocation } from "@/providers/SearchLocationProvider";
 import * as Location from 'expo-location';
+import { GeocodingResponse, LocationChoice } from "@/types/LocationChoice";
+import {Picker} from '@react-native-picker/picker';
 
 export function Header() {
 	const { setLocation, setErrorMessage } = useSearchlocation();
 	const [ locationSearched, setLocationSearched ] = useState<string | undefined>();
+	const [ locationChoices, setLocationChoices ] = useState<LocationChoice[]>();
+	const [ selectedLocation, setSelectedLocation ] = useState<LocationChoice>();
 	const colorScheme = useColorScheme();
+	const geocodingUrl = "https://geocoding-api.open-meteo.com/v1/search?name="
 
 	async function getCurrentLocation() {
 		setErrorMessage(null);
@@ -26,6 +31,21 @@ export function Header() {
 		setLocation(`${latitude} ${longitude}`)
 	}
 
+	
+	useEffect(() => {
+		async function getLocation() {
+			const response = await fetch(geocodingUrl + locationSearched, {method: "GET"});
+			if (response.ok)
+			{
+				const result = await response.json() as GeocodingResponse
+				setLocationChoices(result.results);
+			}
+			else
+				setErrorMessage("Can not find location.")
+		}
+		getLocation();
+	}, [locationSearched]);
+
 
 	useEffect(() => {
 		getCurrentLocation();
@@ -34,15 +54,32 @@ export function Header() {
 	return (
 		<View style={styles.header}>
 			<FontAwesome name="search" size={24} color={tintColor} />
-			<TextInput
-				placeholder="Entez une localisation..."
-				style={[styles.input, { color: Colors[colorScheme ?? "light"].text }]}
-				placeholderTextColor={secondaryTextColor}
-				value={locationSearched}
-				onChangeText={setLocationSearched}
-				onSubmitEditing={() => setLocation(locationSearched)}
-				returnKeyType="search"
-			/>
+			<View>
+				<TextInput
+					placeholder="Entez une localisation..."
+					style={[styles.input, { color: Colors[colorScheme ?? "light"].text }]}
+					placeholderTextColor={secondaryTextColor}
+					value={locationSearched}
+					onChangeText={setLocationSearched}
+					onSubmitEditing={() => setLocation(`${selectedLocation?.latitude} ${selectedLocation?.longitude}`)}
+					returnKeyType="search"
+				/>
+				{locationChoices && (
+					<Picker 
+						selectedValue={selectedLocation}
+						onValueChange={(itemValue, itemIndex) =>
+							setSelectedLocation(itemValue)
+						}
+					>
+						{locationChoices.map((locationChoice) => 
+							<Picker.Item 
+								label={`${locationChoice.name} ${locationChoice.admin1}, ${locationChoice.country}`}
+								value={locationChoice}
+							/>
+						)}
+					</Picker>
+				)}
+			</View>
 			<Pressable
 				onPress={getCurrentLocation}
 				style={({ pressed }) => [
