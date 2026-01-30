@@ -4,6 +4,8 @@ export interface LocationChoice{
 	country: string;
 	latitude: number;
 	longitude: number;
+	customLabel?: string;
+	customValue?: string;
 }
 
 export interface GeocodingResponse {
