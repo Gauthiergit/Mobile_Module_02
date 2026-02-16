@@ -10,7 +10,7 @@ export default function WeeklyScreen() {
 		<View style={Styles.container}>
 			<ThemedText type="title">Weekly</ThemedText>
 			{location && (
-				<ThemedText type="default">{location}</ThemedText>
+				<ThemedText type="default">{location.latitude} {location.longitude}</ThemedText>
 			)}
 			{errorMessage && (
 				<ThemedText type="default" color={errorTextColor}>{errorMessage}</ThemedText>

@@ -5,14 +5,12 @@ import { ThemedText } from "./ThemedText";
 export type CustomDropdownProps = {
 	data: any[];
 	labelKey: string;
-	valueKey: string;
-	onChange: (value: string) => void;
+	onChange: (value: any) => void;
 }
 
 export function CustomDropdown({
 	data,
 	labelKey,
-	valueKey,
 	onChange
 }: CustomDropdownProps) {
 	const colorScheme = useColorScheme();
@@ -27,14 +25,13 @@ export function CustomDropdown({
 				>
 					{data.map((item, index) => (
 						<TouchableOpacity
-							key={item[valueKey] || index}
+							key={index}
 							style={[styles.item,
 							{ backgroundColor: backgroundColor }
 							]}
 							onPress={() => {
-								console.log(`Press on ${item[labelKey]}`)
 								Keyboard.dismiss();
-								onChange(item[valueKey]);
+								onChange(item);
 							}}
 						>
 							<ThemedText>{item[labelKey]}</ThemedText>

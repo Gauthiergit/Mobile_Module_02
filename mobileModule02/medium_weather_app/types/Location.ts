@@ -1,11 +1,10 @@
 export interface LocationChoice{
-	name: string;
-	admin1: string;
-	country: string;
+	name: string | null;
+	admin1: string | null;
+	country: string | null;
 	latitude: number;
 	longitude: number;
 	customLabel?: string;
-	customValue?: string;
 }
 
 export interface GeocodingResponse {

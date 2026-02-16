@@ -1,17 +1,18 @@
 import { Colors, secondaryTextColor, tintColor } from "@/constants/theme";
 import { useEffect, useState } from "react";
-import { Pressable, StyleSheet, TextInput, useColorScheme, View } from "react-native";
+import { Pressable, StyleSheet, TextInput, useColorScheme, View, Platform } from "react-native";
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useSearchlocation } from "@/providers/SearchLocationProvider";
 import * as Location from 'expo-location';
-import { GeocodingResponse, LocationChoice } from "@/types/LocationChoice";
+import { GeocodingResponse, LocationChoice } from "@/types/Location";
 import { CustomDropdown } from "./CustomDropDown";
 
 
 export function Header() {
 	const { setLocation, setErrorMessage } = useSearchlocation();
-	const [locationSearched, setLocationSearched] = useState<string | undefined>();
+	const [locationSearched, setLocationSearched] = useState<string>("");
+	const [debouncedQuery, setDebouncedQuery] = useState<string>("");
 	const [locationChoices, setLocationChoices] = useState<LocationChoice[]>();
 	const [isOpen, setIsOpen] = useState<boolean>(false);
 	const colorScheme = useColorScheme();
@@ -20,6 +21,12 @@ export function Header() {
 	async function getCurrentLocation() {
 		setErrorMessage(null);
 		setLocation(undefined);
+
+		if (Platform.OS === 'web') {
+			setErrorMessage("La localisation automatique n'est pas disponible sur web");
+			return;
+		}
+
 		let { status } = await Location.requestForegroundPermissionsAsync();
 		if (status !== 'granted') {
 			setErrorMessage("Geolocalisation is not available");
@@ -27,23 +34,40 @@ export function Header() {
 		}
 
 		let location = await Location.getCurrentPositionAsync({});
-		let latitude = location.coords.latitude.toString();
-		let longitude = location.coords.longitude.toString();
-		setLocation(`${latitude} ${longitude}`)
+		if (location) {
+			let reverseGeocode = await Location.reverseGeocodeAsync({
+				latitude: location.coords.latitude,
+				longitude: location.coords.longitude,
+			});
+			if (reverseGeocode && reverseGeocode.length > 0) {
+				const myLocation: LocationChoice = {
+					name: reverseGeocode[0].city,
+					admin1: reverseGeocode[0].region,
+					country: reverseGeocode[0].country,
+					latitude: location.coords.latitude,
+					longitude: location.coords.longitude,
+				};
+				setLocation(myLocation);
+			}
+		}
 	}
 
+	useEffect(() => {
+		const trimmed = locationSearched.trim();
+		const handle = setTimeout(() => setDebouncedQuery(trimmed), 350);
+		return () => clearTimeout(handle);
+	}, [locationSearched]);
 
 	useEffect(() => {
 		async function getLocation() {
-			if (locationSearched) {
-				const response = await fetch(`${geocodingUrl}${locationSearched}`, { method: "GET" });
+			if (debouncedQuery) {
+				const response = await fetch(`${geocodingUrl}${debouncedQuery}`, { method: "GET" });
 				if (response.ok) {
 					const result = await response.json() as GeocodingResponse
 					if (result.results && Array.isArray(result.results)) {
 						const formatedData = result.results.map(choice => ({
 							...choice,
-							customLabel: `${choice.name} ${choice.admin1}, ${choice.country}`,
-							customValue: `${choice.latitude} ${choice.longitude}`
+							customLabel: `${choice.name} ${choice.admin1}, ${choice.country}`
 						}));
 						setLocationChoices(formatedData);
 					}
@@ -53,7 +77,7 @@ export function Header() {
 			}
 		}
 		getLocation();
-	}, [locationSearched]);
+	}, [debouncedQuery]);
 
 
 	useEffect(() => {
@@ -65,20 +89,17 @@ export function Header() {
 			setIsOpen(true);
 	}, [locationChoices])
 
-	const handleLocationSelection = (locationSelected: string) => {
-		console.log("HandleLocation Selected");
-		console.log(locationSelected);
-		if (locationSelected)
-		{
+	const handleLocationSelection = (locationSelected: LocationChoice) => {
+		if (locationSelected) {
 			setLocation(locationSelected);
+			setErrorMessage(null);
 			setLocationChoices([]);
 			setIsOpen(false);
 		}
 	}
 
 	useEffect(() => {
-		if (!locationSearched)
-		{
+		if (!locationSearched.trim()) {
 			setLocationChoices([])
 			setIsOpen(false);
 		}
@@ -86,8 +107,8 @@ export function Header() {
 
 	const handleLocationSubmit = () => {
 		if (locationChoices && locationChoices?.length > 0) {
-			const location = `${locationChoices[0].latitude} ${locationChoices[0].longitude}`
-			setLocation(location);
+			setErrorMessage(null);
+			setLocation(locationChoices[0]);
 		}
 		setIsOpen(false);
 	}
@@ -109,7 +130,6 @@ export function Header() {
 					<CustomDropdown
 						data={locationChoices}
 						labelKey="customLabel"
-						valueKey="customValue"
 						onChange={handleLocationSelection}
 					/>
 				)}

@@ -10,7 +10,7 @@ export default function TodayScreen() {
 		<View style={Styles.container}>
 			<ThemedText type="title">Today</ThemedText>
 			{location && (
-				<ThemedText type="default">{location}</ThemedText>
+				<ThemedText type="default">{location.latitude} {location.longitude}</ThemedText>
 			)}
 			{errorMessage && (
 				<ThemedText type="default" color={errorTextColor}>{errorMessage}</ThemedText>
