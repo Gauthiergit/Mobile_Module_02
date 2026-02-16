@@ -1,5 +1,5 @@
 import { Colors, tintColor } from "@/constants/theme";
-import { ScrollView, StyleSheet, TouchableOpacity, useColorScheme, View } from "react-native";
+import { Keyboard, ScrollView, StyleSheet, TouchableOpacity, useColorScheme, View } from "react-native";
 import { ThemedText } from "./ThemedText";
 
 export type CustomDropdownProps = {
@@ -20,14 +20,22 @@ export function CustomDropdown({
 	return (
 		<View style={styles.container} pointerEvents="box-none">
 			<View style={[styles.dropdownList, { backgroundColor: backgroundColor }]} pointerEvents="auto">
-				<ScrollView nestedScrollEnabled={true} style={styles.scrollView}>
+				<ScrollView
+					nestedScrollEnabled={true}
+					keyboardShouldPersistTaps="handled"
+					style={styles.scrollView}
+				>
 					{data.map((item, index) => (
 						<TouchableOpacity
 							key={item[valueKey] || index}
 							style={[styles.item,
 							{ backgroundColor: backgroundColor }
 							]}
-							onPress={() => onChange(item[valueKey])}
+							onPress={() => {
+								console.log(`Press on ${item[labelKey]}`)
+								Keyboard.dismiss();
+								onChange(item[valueKey]);
+							}}
 						>
 							<ThemedText>{item[labelKey]}</ThemedText>
 						</TouchableOpacity>

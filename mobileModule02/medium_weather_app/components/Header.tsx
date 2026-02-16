@@ -13,7 +13,6 @@ export function Header() {
 	const { setLocation, setErrorMessage } = useSearchlocation();
 	const [locationSearched, setLocationSearched] = useState<string | undefined>();
 	const [locationChoices, setLocationChoices] = useState<LocationChoice[]>();
-	const [selectedLocation, setSelectedLocation] = useState<string>();
 	const [isOpen, setIsOpen] = useState<boolean>(false);
 	const colorScheme = useColorScheme();
 	const geocodingUrl = "https://geocoding-api.open-meteo.com/v1/search?name="
@@ -37,7 +36,7 @@ export function Header() {
 	useEffect(() => {
 		async function getLocation() {
 			if (locationSearched) {
-				const response = await fetch(geocodingUrl + locationSearched, { method: "GET" });
+				const response = await fetch(`${geocodingUrl}${locationSearched}`, { method: "GET" });
 				if (response.ok) {
 					const result = await response.json() as GeocodingResponse
 					if (result.results && Array.isArray(result.results)) {
@@ -67,27 +66,28 @@ export function Header() {
 	}, [locationChoices])
 
 	const handleLocationSelection = (locationSelected: string) => {
-		setSelectedLocation(locationSelected)
-		if (selectedLocation)
+		console.log("HandleLocation Selected");
+		console.log(locationSelected);
+		if (locationSelected)
 		{
-			setLocation(selectedLocation);
+			setLocation(locationSelected);
+			setLocationChoices([]);
 			setIsOpen(false);
 		}
 	}
 
 	useEffect(() => {
 		if (!locationSearched)
+		{
+			setLocationChoices([])
 			setIsOpen(false);
+		}
 	}, [locationSearched])
 
 	const handleLocationSubmit = () => {
-		if (selectedLocation)
-			setLocation(selectedLocation);
-		else {
-			if (locationChoices) {
-				const location = `${locationChoices[0].latitude} ${locationChoices[0].longitude}`
-				setLocation(location);
-			}
+		if (locationChoices && locationChoices?.length > 0) {
+			const location = `${locationChoices[0].latitude} ${locationChoices[0].longitude}`
+			setLocation(location);
 		}
 		setIsOpen(false);
 	}
