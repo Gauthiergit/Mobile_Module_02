@@ -18,11 +18,11 @@ export default function TodayScreen() {
 	const fetchWeatherDatas = useCallback(async () => {
 		if (!location) return;
 		setLoading(true);
-		setErrorMessage(null); // Réinitialiser l'erreur
+		setErrorMessage(null);
 
 		try {
 			const params = {
-				latitude: location.latitude, // Pas besoin de toFixed ici, l'API gère très bien
+				latitude: location.latitude,
 				longitude: location.longitude,
 				hourly: ["weather_code", "temperature_2m", "wind_speed_10m"],
 				forecast_days: 1
@@ -52,11 +52,11 @@ export default function TodayScreen() {
 			}
 			setHourlyWeather(mapped);
 		} catch (e) {
-			setErrorMessage("Erreur lors de la récupération des données.");
+			setErrorMessage("Service connection is lost. Please check your internet connection or try again later");
 		} finally {
 			setLoading(false);
 		}
-	}, [location, setErrorMessage]);
+	}, [location]);
 
 	useEffect(() => {
 		fetchWeatherDatas();
@@ -70,7 +70,7 @@ export default function TodayScreen() {
 				</View>
 			) : (
 				<>
-					{location && (
+					{location && !errorMessage && (
 						<View style={{flex: 1}}>
 							<View style={styles.header}>
 								<ThemedText type="title">{location.name}</ThemedText>
@@ -83,7 +83,7 @@ export default function TodayScreen() {
 								scrollEnabled={true}
 								scrollEventThrottle={16}
 							>
-								{hourlyWeather.length > 0 ? (
+								{hourlyWeather.length > 0 && (
 									hourlyWeather.map((weather) => (
 										<View key={weather.time} style={styles.row}>
 											<ThemedText>{weather.time}</ThemedText>
@@ -95,16 +95,15 @@ export default function TodayScreen() {
 											</View>
 										</View>
 									))
-								) : (
-									<View style={{ padding: 20, alignItems: 'center' }}>
-										<ThemedText>Aucune donnée disponible</ThemedText>
-									</View>
 								)}
+								
 							</ScrollView>
 						</View>
 					)}
 					{errorMessage && (
-						<ThemedText type="default" color={errorTextColor}>{errorMessage}</ThemedText>
+						<View style={styles.error}>
+							<ThemedText type="default" color={errorTextColor} style={{ textAlign: 'center' }}>{errorMessage}</ThemedText>
+						</View>
 					)}
 				</>
 			)}
@@ -142,4 +141,11 @@ const styles = StyleSheet.create({
 		flexDirection: 'column',
 		gap: 8
 	},
+	error: {
+		flex: 1,
+		alignItems: "center",
+		justifyContent: "center",
+		marginRight: 50,
+		marginLeft: 50
+	}
 });

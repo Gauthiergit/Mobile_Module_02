@@ -41,6 +41,6 @@ export const getWeatherDescription = (weatherCode: number | undefined) => {
 
 export const getWeatherIcon = (weatherCode: number | undefined) => {
 	if (weatherCode == undefined || !isWeatherCode(weatherCode))
-		return "❓";
+		return;
 	return weatherMap[weatherCode].icone;
 }

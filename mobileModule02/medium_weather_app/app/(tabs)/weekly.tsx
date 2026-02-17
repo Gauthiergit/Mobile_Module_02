@@ -51,11 +51,13 @@ export default function WeeklyScreen() {
 			}
 			setWeeklyWeather(mapped);
 		} catch (e) {
-			setErrorMessage("Erreur lors de la récupération des données.");
+			setErrorMessage(
+				"Service connection is lost. Please check your internet connection or try again later"
+			);
 		} finally {
 			setLoading(false);
 		}
-	}, [location, setErrorMessage]);
+	}, [location]);
 
 	useEffect(() => {
 		fetchWeatherDatas();
@@ -69,8 +71,8 @@ export default function WeeklyScreen() {
 				</View>
 			) : (
 				<>
-					{location && (
-						<View style={{flex: 1}}>
+					{location && !errorMessage && (
+						<View style={{ flex: 1 }}>
 							<View style={styles.header}>
 								<ThemedText type="title">{location.name}</ThemedText>
 								<ThemedText type="title">{location.admin1}</ThemedText>
@@ -82,7 +84,7 @@ export default function WeeklyScreen() {
 								scrollEnabled={true}
 								scrollEventThrottle={16}
 							>
-								{weeklyWeather.length > 0 ? (
+								{weeklyWeather.length > 0 && (
 									weeklyWeather.map((weather) => (
 										<View key={weather.date} style={styles.row}>
 											<ThemedText>{weather.date}</ThemedText>
@@ -94,16 +96,14 @@ export default function WeeklyScreen() {
 											</View>
 										</View>
 									))
-								) : (
-									<View style={{ padding: 20, alignItems: 'center' }}>
-										<ThemedText>Aucune donnée disponible</ThemedText>
-									</View>
 								)}
 							</ScrollView>
 						</View>
 					)}
 					{errorMessage && (
-						<ThemedText type="default" color={errorTextColor}>{errorMessage}</ThemedText>
+						<View style={styles.error}>
+							<ThemedText type="default" color={errorTextColor} style={{ textAlign: 'center' }}>{errorMessage}</ThemedText>
+						</View>
 					)}
 				</>
 			)}
@@ -141,4 +141,11 @@ const styles = StyleSheet.create({
 		flexDirection: 'column',
 		gap: 8
 	},
+	error: {
+		flex: 1,
+		alignItems: "center",
+		justifyContent: "center",
+		marginRight: 50,
+		marginLeft: 50
+	}
 });

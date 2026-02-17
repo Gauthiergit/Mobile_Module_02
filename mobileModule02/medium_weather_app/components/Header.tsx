@@ -73,7 +73,7 @@ export function Header() {
 					}
 				}
 				else
-					setErrorMessage("Can not find location.")
+					setErrorMessage("Service connection is lost. Please check your internet connection or try again later")
 			}
 		}
 		getLocation();
