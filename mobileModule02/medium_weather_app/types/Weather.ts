@@ -10,3 +10,10 @@ export interface HourlyWeather {
 	windSpeed: number;
 	weatherCode: number;
 }
+
+export interface WeeklyWeather {
+	date: string;
+	temperatureMax: number;
+	temperatureMin: number;
+	weatherCode: number;
+}
