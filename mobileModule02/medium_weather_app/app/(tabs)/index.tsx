@@ -4,13 +4,13 @@ import { useSearchlocation } from '@/providers/SearchLocationProvider';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import { fetchWeatherApi } from "openmeteo"
-import { Weather } from '@/types/Weather';
-import { weatherMap } from '@/mappers/WeatherMap';
+import { CurrentWeather } from '@/types/Weather';
+import { getWeatherDescription, weatherMap } from '@/mappers/WeatherMap';
+import { WEATHER_URL } from '@/constants/url';
 
 export default function CurrentlyScreen() {
 	const { location, errorMessage, setErrorMessage} = useSearchlocation();
-	const weatherForecastUrl = "https://api.open-meteo.com/v1/forecast";
-	const [curWeather, setCurWeather] = useState<Weather>();
+	const [curWeather, setCurWeather] = useState<CurrentWeather>();
 	const [loading, setLoading] = useState(false);
 
 	useEffect(() => {
@@ -24,10 +24,10 @@ export default function CurrentlyScreen() {
 				};
 				setLoading(true)
 				try {
-					const responses = await fetchWeatherApi(weatherForecastUrl, params);
+					const responses = await fetchWeatherApi(WEATHER_URL, params);
 					const response = responses[0];
 					const current = response.current();
-					const weather: Weather = {
+					const weather: CurrentWeather = {
 						weatherCode: current?.variables(0)?.value(),
 						temperature: current?.variables(1)?.value(),
 						windSpeed: current?.variables(2)?.value()
@@ -45,10 +45,6 @@ export default function CurrentlyScreen() {
 		}
 	}, [location, ])
 
-	let description = "";
-	if (curWeather?.weatherCode && curWeather.weatherCode >= 0)
-		description = weatherMap[curWeather.weatherCode as keyof typeof weatherMap].texte;
-
 	return (
 		<View style={Styles.container}>
 			{loading ? (
@@ -60,7 +56,7 @@ export default function CurrentlyScreen() {
 							<ThemedText type="title">{location.name}</ThemedText>
 							<ThemedText type="title">{location.admin1}</ThemedText>
 							<ThemedText type="title">{location.country}</ThemedText>
-							<ThemedText type="title">{description}</ThemedText>
+							<ThemedText type="title">{getWeatherDescription(curWeather.weatherCode)}</ThemedText>
 							<ThemedText type="title">{curWeather.temperature?.toFixed(2)} °C</ThemedText>
 							<ThemedText type="title">{curWeather.windSpeed?.toFixed(2)} km/h</ThemedText>
 						</View>

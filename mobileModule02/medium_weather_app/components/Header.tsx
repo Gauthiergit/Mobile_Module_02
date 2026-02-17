@@ -23,7 +23,7 @@ export function Header() {
 		setLocation(undefined);
 
 		if (Platform.OS === 'web') {
-			setErrorMessage("La localisation automatique n'est pas disponible sur web");
+			setErrorMessage("Geolocalisation is not available on web");
 			return;
 		}
 
@@ -118,7 +118,7 @@ export function Header() {
 			<FontAwesome name="search" size={24} color={tintColor} />
 			<View style={{ flex: 1, position: 'relative' }}>
 				<TextInput
-					placeholder="Entez une localisation..."
+					placeholder="Entrez une localisation..."
 					style={[styles.input, { color: Colors[colorScheme ?? "light"].text }]}
 					placeholderTextColor={secondaryTextColor}
 					value={locationSearched}
