@@ -27,28 +27,32 @@ export function Header() {
 			return;
 		}
 
-		let { status } = await Location.requestForegroundPermissionsAsync();
-		if (status !== 'granted') {
-			setErrorMessage("Geolocalisation is not available. Please anable it in your App settings.");
-			return;
-		}
-
-		let location = await Location.getCurrentPositionAsync({});
-		if (location) {
-			let reverseGeocode = await Location.reverseGeocodeAsync({
-				latitude: location.coords.latitude,
-				longitude: location.coords.longitude,
-			});
-			if (reverseGeocode && reverseGeocode.length > 0) {
-				const myLocation: LocationChoice = {
-					name: reverseGeocode[0].city,
-					admin1: reverseGeocode[0].region,
-					country: reverseGeocode[0].country,
+		try {
+			let { status } = await Location.requestForegroundPermissionsAsync();
+			if (status !== 'granted') {
+				setErrorMessage("Geolocalisation is not available. Please anable it in your App settings.");
+				return;
+			}
+	
+			let location = await Location.getCurrentPositionAsync({});
+			if (location) {
+				let reverseGeocode = await Location.reverseGeocodeAsync({
 					latitude: location.coords.latitude,
 					longitude: location.coords.longitude,
-				};
-				setLocation(myLocation);
+				});
+				if (reverseGeocode && reverseGeocode.length > 0) {
+					const myLocation: LocationChoice = {
+						name: reverseGeocode[0].city,
+						admin1: reverseGeocode[0].region,
+						country: reverseGeocode[0].country,
+						latitude: location.coords.latitude,
+						longitude: location.coords.longitude,
+					};
+					setLocation(myLocation);
+				}
 			}
+		} catch (error) {
+			setErrorMessage("Service connection is lost. Please check your internet connection or try again later");
 		}
 	}
 
