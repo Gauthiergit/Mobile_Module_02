@@ -8,7 +8,7 @@ import { formatDate } from '@/utils/format';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { fetchWeatherApi } from 'openmeteo';
 import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, StyleSheet, View, ScrollView } from 'react-native';
+import { ActivityIndicator, Keyboard, StyleSheet, View, ScrollView } from 'react-native';
 
 export default function WeeklyScreen() {
 	const { location, errorMessage, setErrorMessage } = useSearchlocation();
@@ -83,6 +83,8 @@ export default function WeeklyScreen() {
 								contentContainerStyle={styles.scrollContent}
 								scrollEnabled={true}
 								scrollEventThrottle={16}
+								onScrollBeginDrag={() => Keyboard.dismiss()}
+								keyboardShouldPersistTaps="handled"
 							>
 								{weeklyWeather.length > 0 && (
 									weeklyWeather.map((weather) => (

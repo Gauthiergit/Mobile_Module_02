@@ -2,7 +2,7 @@ import { ThemedText } from '@/components/ThemedText';
 import { errorTextColor, Styles, tintColor } from '@/constants/theme';
 import { useSearchlocation } from '@/providers/SearchLocationProvider';
 import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Keyboard, Pressable, StyleSheet, View } from 'react-native';
 import { fetchWeatherApi } from "openmeteo"
 import { CurrentWeather } from '@/types/Weather';
 import { getWeatherDescription, getWeatherIcon, weatherMap } from '@/mappers/WeatherMap';
@@ -10,7 +10,7 @@ import { WEATHER_URL } from '@/constants/url';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 
 export default function CurrentlyScreen() {
-	const { location, errorMessage, setErrorMessage} = useSearchlocation();
+	const { location, errorMessage, setErrorMessage } = useSearchlocation();
 	const [curWeather, setCurWeather] = useState<CurrentWeather | null>(null);
 	const [loading, setLoading] = useState(false);
 
@@ -37,8 +37,7 @@ export default function CurrentlyScreen() {
 		} catch {
 			setErrorMessage("Service connection is lost. Please check your internet connection or try again later")
 		}
-		finally
-		{
+		finally {
 			setLoading(false)
 		}
 	}, [location]);
@@ -48,17 +47,17 @@ export default function CurrentlyScreen() {
 	}, [fetchWeatherDatas])
 
 	return (
-		<View style={Styles.container}>
+		<Pressable style={Styles.container} onPress={() => Keyboard.dismiss()}>
 			{loading ? (
 				<ActivityIndicator size="large" color={tintColor} />
 			) : (
-				<View style={{flex: 1}}>
+				<View style={{ flex: 1 }}>
 					{location && !errorMessage && (
 						<View style={styles.container}>
 							<ThemedText type="title">{location.name}</ThemedText>
 							<ThemedText type="title">{location.admin1}</ThemedText>
 							<ThemedText type="title">{location.country}</ThemedText>
-							{curWeather && !errorMessage &&(
+							{curWeather && !errorMessage && (
 								<>
 									<View style={styles.description}>
 										<MaterialCommunityIcons name={getWeatherIcon(curWeather.weatherCode) as any} size={50} color={tintColor} />
@@ -75,10 +74,10 @@ export default function CurrentlyScreen() {
 							<ThemedText type="default" color={errorTextColor} style={{ textAlign: 'center' }}>{errorMessage}</ThemedText>
 						</View>
 					)}
-					
+
 				</View>
 			)}
-		</View>
+		</Pressable>
 	);
 }
 

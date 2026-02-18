@@ -1,6 +1,6 @@
 import { Colors, secondaryTextColor, tintColor } from "@/constants/theme";
 import { useEffect, useState } from "react";
-import { Pressable, StyleSheet, TextInput, useColorScheme, View, Platform } from "react-native";
+import { Pressable, StyleSheet, TextInput, useColorScheme, View, Platform, Keyboard } from "react-native";
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useSearchlocation } from "@/providers/SearchLocationProvider";
@@ -16,7 +16,7 @@ export function Header() {
 	const [locationChoices, setLocationChoices] = useState<LocationChoice[]>();
 	const [isOpen, setIsOpen] = useState<boolean>(false);
 	const colorScheme = useColorScheme();
-	const geocodingUrl = "https://geocoding-api.open-meteo.com/v1/search?name="
+	const geocodingUrl = "https://geocoding-api.open-meteo.com/v1/search"
 
 	async function getCurrentLocation() {
 		setErrorMessage(null);
@@ -61,19 +61,23 @@ export function Header() {
 	useEffect(() => {
 		async function getLocation() {
 			if (debouncedQuery) {
-				const response = await fetch(`${geocodingUrl}${debouncedQuery}`, { method: "GET" });
-				if (response.ok) {
-					const result = await response.json() as GeocodingResponse
-					if (result.results && Array.isArray(result.results)) {
-						const formatedData = result.results.map(choice => ({
-							...choice,
-							customLabel: `${choice.name} ${choice.admin1}, ${choice.country}`
-						}));
-						setLocationChoices(formatedData);
+				try {
+					const response = await fetch(`${geocodingUrl}?name=${debouncedQuery}&count=5`, { method: "GET" });
+					if (!response.ok)
+						setErrorMessage("Service connection is lost. Please check your internet connection or try again later")
+					else{
+						const result = await response.json() as GeocodingResponse
+						if (result.results && Array.isArray(result.results)) {
+							const formatedData = result.results.map(choice => ({
+								...choice,
+								customLabel: `${choice.name} ${choice.admin1}, ${choice.country}`
+							}));
+							setLocationChoices(formatedData);
+						}
 					}
-				}
-				else
+				} catch (error) {
 					setErrorMessage("Service connection is lost. Please check your internet connection or try again later")
+				}
 			}
 		}
 		getLocation();
@@ -82,7 +86,7 @@ export function Header() {
 
 	useEffect(() => {
 		getCurrentLocation();
-	}, [setLocation]);
+	}, []);
 
 	useEffect(() => {
 		if (locationChoices && locationChoices.length > 0)
@@ -90,9 +94,9 @@ export function Header() {
 	}, [locationChoices])
 
 	const handleLocationSelection = (locationSelected: LocationChoice) => {
+		setErrorMessage(null);
 		if (locationSelected) {
 			setLocation(locationSelected);
-			setErrorMessage(null);
 			setLocationChoices([]);
 			setIsOpen(false);
 		}
@@ -100,17 +104,29 @@ export function Header() {
 
 	useEffect(() => {
 		if (!locationSearched.trim()) {
-			setLocationChoices([])
+			setLocationChoices([]);
 			setIsOpen(false);
+			Keyboard.dismiss();
 		}
 	}, [locationSearched])
 
+	const isLocationExists = () :LocationChoice | null | undefined => {
+		if (locationChoices &&
+			locationChoices?.length > 0)
+			return locationChoices.find(choice => 
+				choice.name?.toLowerCase() === debouncedQuery.toLowerCase()
+			) || null;
+	}
+
 	const handleLocationSubmit = () => {
-		if (locationChoices && locationChoices?.length > 0) {
-			setErrorMessage(null);
-			setLocation(locationChoices[0]);
-		}
+		setErrorMessage(null);
 		setIsOpen(false);
+		const location = isLocationExists();
+		if (location)
+			setLocation(location);
+		else {
+			setErrorMessage("Could not find any adress for the city name you enter.")
+		}
 	}
 
 	return (

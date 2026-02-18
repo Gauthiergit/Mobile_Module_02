@@ -8,7 +8,7 @@ import { formatHour } from '@/utils/format';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { fetchWeatherApi } from 'openmeteo';
 import { useEffect, useState, useCallback } from 'react';
-import { ActivityIndicator, ScrollView, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Keyboard, ScrollView, StyleSheet, View } from 'react-native';
 
 export default function TodayScreen() {
 	const { location, errorMessage, setErrorMessage } = useSearchlocation();
@@ -82,6 +82,8 @@ export default function TodayScreen() {
 								contentContainerStyle={styles.scrollContent}
 								scrollEnabled={true}
 								scrollEventThrottle={16}
+								onScrollBeginDrag={() => Keyboard.dismiss()}
+								keyboardShouldPersistTaps="handled"
 							>
 								{hourlyWeather.length > 0 && (
 									hourlyWeather.map((weather) => (
