@@ -29,7 +29,7 @@ export function Header() {
 
 		let { status } = await Location.requestForegroundPermissionsAsync();
 		if (status !== 'granted') {
-			setErrorMessage("Geolocalisation is not available");
+			setErrorMessage("Geolocalisation is not available. Please anable it in your App settings.");
 			return;
 		}
 
